@@ -60,8 +60,7 @@ object FutureVersion extends App {
     p.future
   }
 
-  def countWordOccurrences(urls: List[String], keyword: String):
-    Future[List[(String, Int)]] = {
+  def countWordOccurrences(urls: List[String], keyword: String): Future[List[(String, Int)]] = {
     // partially apply countWordOccurrencesInDOM
     val countKeywordOccurencesInDOM = countWordOccurrencesInDOM(_: DOM, keyword)
 

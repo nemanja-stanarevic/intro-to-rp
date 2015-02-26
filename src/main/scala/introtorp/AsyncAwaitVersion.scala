@@ -61,9 +61,7 @@ object AsyncAwaitVersion extends App {
     p.future
   }
 
-  def countWordOccurrences(urls: List[String], keyword: String):
-    Future[List[(String, Int)]] = {
-
+  def countWordOccurrences(urls: List[String], keyword: String): Future[List[(String, Int)]] = {
     // listOfFutures evaluates to type of List[Future[(String, Int)]
     val listOfFutures = urls
       .map { url => async {
@@ -71,8 +69,8 @@ object AsyncAwaitVersion extends App {
         // DOM, and Int respectively
         val html = await { fetchUrl(url) }
         val dom = await { parseHtmlToDOM(html) }
-        val numberOfOccurences = await { countWordOccurrencesInDOM(dom, keyword) }
-        (url, numberOfOccurences) 
+        val numberOfOccurrences = await { countWordOccurrencesInDOM(dom, keyword) }
+        (url, numberOfOccurrences) 
       }
     }
 

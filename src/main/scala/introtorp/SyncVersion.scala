@@ -25,8 +25,8 @@ object SyncVersion extends App {
     urls map { url =>
       val html = fetchUrl(url)
       val dom = parseHtmlToDOM(html)
-      val numberOfOccurences = countWordOccurrencesInDOM(dom, keyword)
-      (url, numberOfOccurences)
+      val numberOfOccurrences = countWordOccurrencesInDOM(dom, keyword)
+      (url, numberOfOccurrences)
     }
   }
 
