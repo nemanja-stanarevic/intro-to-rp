@@ -3,10 +3,12 @@ An Introduction to Reactive Programming
 
 There has been a significant shift in recent years towards server-side and
 network programming using event-driven asynchronous runtime environments and
-frameworks such as Node.js, Twisted, and Netty/NIO.  However, with event-driven
-asynchronous programming, what typically starts as straightforward but
-potentially inefficient synchronous code often leads to an efficient mess of
-nested callbacks. Can we do better? Can we combine the simplicity of synchronous
+frameworks such as Node.js, Twisted, and Netty/NIO. Asynchronous code allows
+independent IO operations to run concurrently. However, this improved efficiency
+comes at a cost - straightforward synchronous code may become a mess of nested
+callbacks.
+
+Can we do better? Can we combine the simplicity of synchronous
 code with the efficiency of the asynchronous approach? It turns out
 we can. `Future` abstraction allows us express the effect of latency in
 asynchronous computation, encapsulate event-handling code, and use higher-order
@@ -130,9 +132,9 @@ code.
 
 `Future` allows for similar pattern with asynchronous code. `Future` is an
 object that expresses a result of asynchronous computation - a value that is not
-available yet but may be available in the future [1]. This allows asynchronous
+available yet but may be available in the future [^1]. This allows asynchronous
 version of `fetchUrl` to return a value of type `Future[String]` which is then
-used in synchronous-looking code, without worrying about whether the `String`
+used in synchronous-looking code, without worrying about whether a `String`
 value is actually available.
 
 `Promise`s are utility objects that make it easier to construct `Future`s, like so:
@@ -149,72 +151,29 @@ value is actually available.
 
 ```
 
-In this example, function `fetchUrl` calls callback-based counterpart
-`fetchUrlAsync` with a success handler that completes `Promise p` with success
-and a failure handler that completes `p` with failure. The function then extracts
-a `Future` out of `Promise p` and returns it to the caller. This "wrapping" of
+In this example, `fetchUrl` calls callback-based counterpart `fetchUrlAsync`
+with a success handler that completes `Promise p` with success and a failure
+handler that completes `p` with failure. The function then extracts a `Future`
+out of `Promise p` and returns it to the caller. This "wrapping" of
 callback-based code using `Promise` objects to return a `Future` object is a
 very common pattern in reactive programming.
 
-`parseHtmlToDOM` and `countWordOccurrencesInDOM` would be similarly refactored
-to return `Future[DOM]` and `Future[Int]` respectively.
+The `parseHtmlToDOM` and `countWordOccurrencesInDOM` functions would be
+similarly refactored to return `Future[DOM]` and `Future[Int]` respectively.
 
-
-##Future Combinators
-
-`Future` trait defines standard higher-order functions such as map, filter, fold
-and reduce. These functions are not exactly the same as ones defined on
-Lists, but are similar.
-
-For example, `flatMap` defined on `List` will apply a function that takes an
-element and returns a `List` of sorts [2] and subsequently flatten `List` of
-`List` into a single `List`. Similarly, `flatMap` on `Future` will apply a
-function that returns another `Future` and flatten `Future` of `Future`
-into a single `Future`.
-
-Here is a sketch of how `flatMap` may be implemented on `Future[T]`:
-
-```scala
-
-  def flatMap[S](func: T => Future[S]): Future[S] = {
-    val p = Promise[S]()
-
-    // onComplete method registers a callback that is executed when
-    // this Future is completed
-    this onComplete {
-      // if this Future fails, complete the promise with failure, i.e.
-      // propagate failure of "this" Future to the resulting Future[S]
-      case Failure(e) => p.failure(e)
-
-      // if "this" Future is successful, evaluate provided function
-      // with its result and complete the promise appropriately
-      case Success(value) =>
-        // apply provided function "func" that returns Future[S]
-        val resultingFuture = func(value)
-
-        // register onComplete callback on the resulting Future[S]
-        resultingFuture onComplete {
-          // if computation fails, complete the promise with failure
-          case Failure(e) => p.failure(e)
-
-          // if computation returns a value, complete the promise with
-          // the resulting value
-          case Success(resultingValue) => p.success(resultingValue)
-        }
-    }
-
-    p.future
-  }
-
-```
-
-Similarly to `fetchUrl` example, the above code uses `Promise` to encapsulate
-two nested onComplete callbacks into a function returning `Future`.
 
 ##Composing Futures and a Way to Map/Filter/Reduce Hell
 
-`Future` combinators make it possible to compose functions returning `Future`
-using familiar functional programming patterns:
+`Future` trait defines standard higher-order functions such as `map`, `flatMap`,
+`filter`, `fold`, and `reduce`. These functions are not exactly the same as ones
+defined on `List`, but are similar. For example, the `flatMap` function defined
+on `Future[T]` applies a function that takes `T` as an argument and returns
+`Future[S]` and flattens the resulting `Future[Future[S]]` into a single
+`Future[S]` [^2].  This is analogue to how `flatMap` on `List` flattens `List`
+of `List` into a single `List`.
+
+These higher-order functions make it possible to compose functions returning
+`Future` using familiar functional programming patterns:
 
 ```scala
   import scala.concurrent.{ Future, Promise }
@@ -238,10 +197,9 @@ using familiar functional programming patterns:
 
 ```
 
-The new version of the function simply `flatMap`s the result of `fetchUrl`
-function (`Future[String]`) over `parseHtmlToDOM` (returning `Future[DOM]`) and
-`countKeywordOccurencesInDOM` (returning `Future[Int]`) and finally maps the result
-to a pair of URL and count, resulting in `Future[(String, Int)]`.
+The new version of `countWordOccurrences` simply `flatMap`s the result of
+`fetchUrl` over `parseHtmlToDOM` and `countKeywordOccurencesInDOM` and finally
+maps the result to a pair of URL and count, resulting in `Future[(String, Int)]`.
 
 The last step is necessary to transform a `List` of `Furture[(String, Int)]`
 into a `Future` of `List[(String, Int)]`.
@@ -256,7 +214,7 @@ callback hell for map/filter/reduce hell.
 
 Finally, reactive code composed with higher-order functions is often not purely
 functional – it typically involves side effects through network or file system
-IO [3].
+IO [^3].
 
 So, is there an even better way to write asynchronous code?
 
@@ -320,7 +278,7 @@ Extensions with JavaScript](http://jhusain.github.com/learnrx/index.html).
 `Actor` on the other hand provides building blocks for distributed, fault-tolerant
 message passing applications, such as messaging servers, trading systems and
 telecom appliances.  The most notable implementations of `Actor` include
-[Erlang's OTP](http://www.erlang.org/doc/) and [TypeSafe's Akka](http://akka.io/).
+[Erlang OTP](http://www.erlang.org/doc/) and [TypeSafe Akka](http://akka.io/).
 
 
 -----------------------------
@@ -328,8 +286,42 @@ telecom appliances.  The most notable implementations of `Actor` include
 [1]: Since the computation may succeed or throw an error, `Future` will either
 complete with a value (success) or with an error (failure).
 
-[2]: More precisely, `flatMap` defined on Scala `List` takes a function that
-returns `GenTraversableOnce`, but this is a Scala implementation detail.
+[2]: You don't need to know this to follow the rest of this article, but if you
+are curious, here is a sketch of how flatMap may be implemented on Future[T]:
+
+```scala
+
+  def flatMap[S](func: T => Future[S]): Future[S] = {
+    val p = Promise[S]()
+
+    // onComplete method registers a callback that is executed when
+    // this Future is completed
+    this onComplete {
+      // if this Future fails, complete the promise with failure, i.e.
+      // propagate failure of "this" Future to the resulting Future[S]
+      case Failure(e) => p.failure(e)
+
+      // if "this" Future is successful, evaluate provided function
+      // with its result and complete the promise appropriately
+      case Success(value) =>
+        // apply provided function "func" that returns Future[S]
+        val resultingFuture = func(value)
+
+        // register onComplete callback on the resulting Future[S]
+        resultingFuture onComplete {
+          // if computation fails, complete the promise with failure
+          case Failure(e) => p.failure(e)
+
+          // if computation returns a value, complete the promise with
+          // the resulting value
+          case Success(resultingValue) => p.success(resultingValue)
+        }
+    }
+
+    p.future
+  }
+
+```
 
 [3]: This is why popular "Reactive Functional Programming" term feels like a bit
 of misnomer.
