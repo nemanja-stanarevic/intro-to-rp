@@ -4,9 +4,9 @@ An Introduction to Reactive Programming
 There has been a significant shift in recent years towards server-side and
 network programming using event-driven asynchronous runtime environments and
 frameworks such as Node.js, Twisted, and Netty/NIO. Asynchronous code allows
-independent IO operations to run concurrently. However, this improved efficiency
-comes at a cost - straightforward synchronous code may become a mess of nested
-callbacks.
+independent IO operations to run concurrently resulting in efficient code.
+However, this improved efficiency comes at a cost - straightforward synchronous
+code may become a mess of nested callbacks.
 
 Can we do better? Can we combine the simplicity of synchronous
 code with the efficiency of the asynchronous approach? It turns out
