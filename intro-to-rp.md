@@ -141,7 +141,7 @@ value is actually available.
 
 ```scala
 
-  def fetchUrl(url: String) : Future[String] = {
+  def fetchUrl(url: String): Future[String] = {
     val p = Promise[String]()
     fetchUrlAsync(url,
        successHandler = { html => p.success(html) },
@@ -172,7 +172,7 @@ on `Future[T]` applies a function that takes `T` as an argument and returns
 `Future[S]` [^2].  This is analogue to how `flatMap` on `List` flattens `List`
 of `List` into a single `List`.
 
-These higher-order functions make it possible to compose functions returning
+The higher-order functions make it possible to compose functions returning
 `Future` using familiar functional programming patterns:
 
 ```scala
@@ -287,7 +287,7 @@ telecom appliances.  The most notable implementations of `Actor` include
 complete with a value (success) or with an error (failure).
 
 [2]: You don't need to know this to follow the rest of this article, but if you
-are curious, here is a sketch of how flatMap may be implemented on Future[T]:
+are curious, here is a sketch of how `flatMap` may be implemented on `Future[T]`:
 
 ```scala
 
