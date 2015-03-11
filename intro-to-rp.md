@@ -151,7 +151,7 @@ value is actually available.
 
 ```
 
-In this example, `fetchUrl` calls callback-based counterpart `fetchUrlAsync`
+In this example, `fetchUrl` calls the callback-based counterpart `fetchUrlAsync`
 with a success handler that completes `Promise p` with success and a failure
 handler that completes `p` with failure. The function then extracts a `Future`
 out of `Promise p` and returns it to the caller. This "wrapping" of
