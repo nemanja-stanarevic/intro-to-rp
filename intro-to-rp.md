@@ -10,7 +10,7 @@ code may become a mess of nested callbacks.
 
 Can we do better? Can we combine the simplicity of synchronous
 code with the efficiency of the asynchronous approach? It turns out
-we can. `Future` abstraction allows us express the effect of latency in
+we can. `Future` abstraction allows us to express the effect of latency in
 asynchronous computation, encapsulate event-handling code, and use higher-order
 functions, such as map, reduce, and filter, to compose clean, readable,
 asynchronous code.
@@ -23,17 +23,17 @@ use `Promise` to turn callback-based building blocks into functions returning
 
 While examples are in Scala, the abstractions and patterns described are
 applicable to most modern languages. Basic familiarity with functional patterns
-is assumed but you can catch up reading [Mary’s awesome introduction to functional
+is assumed but you can catch up reading [Mary's awesome introduction to functional
 programming](https://codewords.hackerschool.com/issues/one/an-introduction-to-functional-programming).
 
 
 ##To Callback Hell and Back
 
 Consider the following example of single-threaded synchronous code:
-`countWordOccurrences` function takes a `List` of URLs and a keyword, fetches
+the `countWordOccurrences` function takes a `List` of URLs and a keyword, fetches
 HTML behind each URL, parses HTML into DOM representation, and counts the number
 of times the keyword occurs within each page.  It returns a `List` of pairs of
-URL and the count:
+URL and count:
 
 ```scala
 
@@ -166,7 +166,7 @@ similarly refactored to return `Future[DOM]` and `Future[Int]` respectively.
 
 `Future` trait defines standard higher-order functions such as `map`, `flatMap`,
 `filter`, `fold`, and `reduce`. These functions are not exactly the same as ones
-defined on `List`, but are similar. For example, the `flatMap` function defined
+defined on `List`, but are similar. For example, `flatMap` defined
 on `Future[T]` applies a function that takes `T` as an argument and returns
 `Future[S]` and flattens the resulting `Future[Future[S]]` into a single
 `Future[S]` [^2].  This is analogue to how `flatMap` on `List` flattens `List`
