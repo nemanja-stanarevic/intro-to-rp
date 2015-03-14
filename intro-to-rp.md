@@ -132,7 +132,7 @@ code.
 
 `Future` allows for similar pattern with asynchronous code. `Future` is an
 object that expresses a result of asynchronous computation - a value that is not
-available yet but may be available in the future [^1]. This allows asynchronous
+available yet but may be available in the future<sup>[1]</sup>. This allows asynchronous
 version of `fetchUrl` to return a value of type `Future[String]` which is then
 used in synchronous-looking code, without worrying about whether a `String`
 value is actually available.
@@ -169,7 +169,7 @@ similarly refactored to return `Future[DOM]` and `Future[Int]` respectively.
 defined on `List`, but are similar. For example, `flatMap` defined
 on `Future[T]` applies a function that takes `T` as an argument and returns
 `Future[S]` and flattens the resulting `Future[Future[S]]` into a single
-`Future[S]` [^2].  This is analogue to how `flatMap` on `List` flattens `List`
+`Future[S]`<sup>[2]</sup>.  This is analogue to how `flatMap` on `List` flattens `List`
 of `List` into a single `List`.
 
 The higher-order functions make it possible to compose functions returning
@@ -214,7 +214,7 @@ callback hell for map/filter/reduce hell.
 
 Finally, reactive code composed with higher-order functions is often not purely
 functional – it typically involves side effects through network or file system
-IO [^3].
+IO<sup>[3]</sup>.
 
 So, is there an even better way to write asynchronous code?
 
