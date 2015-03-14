@@ -181,14 +181,14 @@ The higher-order functions make it possible to compose functions returning
 
   def countWordOccurrences(urls: List[String], keyword: String): Future[List[(String, Int)]] = {
     // partially apply countWordOccurrencesInDOM
-    val countKeywordOccurencesInDOM = countWordOccurrencesInDOM(_: DOM, keyword)
+    val countKeywordOccurrencesInDOM = countWordOccurrencesInDOM(_: DOM, keyword)
 
     // expression evaluates to List[Future[(String, Int)]
     val listOfFutures = urls
       .map { url =>
              fetchUrl(url)
                .flatMap(parseHtmlToDOM)
-               .flatMap(countKeywordOccurencesInDOM)
+               .flatMap(countKeywordOccurrencesInDOM)
                .map { count => (url, count) } }
 
     // transform List[Future[(String, Int)] to Future[List[(String, Int)]]
@@ -198,7 +198,7 @@ The higher-order functions make it possible to compose functions returning
 ```
 
 The new version of `countWordOccurrences` simply performs `flatMap` on the result of
-`fetchUrl` over `parseHtmlToDOM` and `countKeywordOccurencesInDOM` and finally
+`fetchUrl` over `parseHtmlToDOM` and `countKeywordOccurrencesInDOM` and finally
 maps the result to a pair of URL and count, resulting in `Future[(String, Int)]`.
 
 The last step is necessary to transform a `List` of `Future[(String, Int)]`
@@ -240,7 +240,7 @@ penalties.
     // listOfFutures evaluates to type List[Future[(String, Int)]
     val listOfFutures = urls
       .map { url => async {
-        // html, dom and numberOfOccurences values are of type String,
+        // html, dom and numberOfOccurrences values are of type String,
         // DOM, and Int respectively
         val html = await { fetchUrl(url) }
         val dom = await { parseHtmlToDOM(html) }
