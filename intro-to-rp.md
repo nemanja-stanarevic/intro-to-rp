@@ -5,7 +5,7 @@ There has been a significant shift in recent years towards server-side and
 network programming using event-driven asynchronous runtime environments and
 frameworks such as Node.js, Twisted, and Netty/NIO. Asynchronous code allows
 independent IO operations to run concurrently, resulting in efficient code.
-However, this improved efficiency comes at a cost - straightforward synchronous
+However, this improved efficiency comes at a cost—straightforward synchronous
 code may become a mess of nested callbacks.
 
 Can we do better? Can we combine the simplicity of synchronous
@@ -48,8 +48,8 @@ URL and count:
 
 ```
 
-This code is easy to reason about - operations are performed one after another,
-in the specified order.  However, this is not very efficient - each `fetchUrl`
+This code is easy to reason about—operations are performed one after another,
+in the specified order.  However, this is not very efficient—each `fetchUrl`
 call is independent from one another and thus easily parallelized, yet this code
 executes them serially.  Furthermore, each `fetchUrl` operation involves network
 IO and will block the execution thread while waiting for IO to complete.
@@ -131,7 +131,7 @@ turn use for their computations.  This leads to easily readable and composable
 code.
 
 `Future` allows for a similar pattern with asynchronous code. `Future` is an
-object that expresses a result of asynchronous computation - a value that is not
+object that expresses a result of asynchronous computation—a value that is not
 available yet but may be available in the future<sup>[1]</sup>. This allows the asynchronous
 version of `fetchUrl` to return a value of type `Future[String]` which is then
 used in synchronous-looking code, without worrying about whether a `String`
@@ -213,7 +213,7 @@ with added processing steps. It may even feel like we are simply trading the
 callback hell for map/filter/reduce hell.
 
 Finally, reactive code composed with higher-order functions is often not purely
-functional – it typically involves side effects through network or file system
+functional—it typically involves side effects through network or file system
 IO<sup>[3]</sup>.
 
 So, is there an even better way to write asynchronous code?
