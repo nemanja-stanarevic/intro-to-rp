@@ -1,38 +1,44 @@
-An Introduction to Reactive Programming
-=======================================
+---
+layout: post
+title: "An introduction to reactive programming"
+issue: "two"
+categories: issues two
+date: 2015-03-23 09:00:00
+author: Nemanja Stanarevic
+---
 
 There has been a significant shift in recent years towards server-side and
 network programming using event-driven asynchronous runtime environments and
 frameworks such as Node.js, Twisted, and Netty/NIO. Asynchronous code allows
 independent IO operations to run concurrently, resulting in efficient code.
-However, this improved efficiency comes at a cost—straightforward synchronous
+However, this improved efficiency comes at a cost &mdash; straightforward synchronous
 code may become a mess of nested callbacks.
 
 Can we do better? Can we combine the simplicity of synchronous
 code with the efficiency of the asynchronous approach? It turns out
-we can. `Future` abstraction allows us to express the effect of latency in
-asynchronous computation, encapsulate event-handling code, and use higher-order
+we can. Futures are an abstraction that allow us to express the effect of latency in
+asynchronous computations, encapsulate event-handling code, and use higher-order
 functions such as map, reduce, and filter, to compose clean and readable
 asynchronous code.
 
 We will explore this by looking at a web-scraping word count example. First,
 we'll write simple synchronous code and consider how this code may look rewritten
 with a callback-based asynchronous framework such as Node.js or Netty. Then, we'll
-use `Promise` to turn callback-based building blocks into functions returning
-`Future`, allowing us to compose code using functional programming constructs.
+use promises to turn callback-based building blocks into functions returning
+futures, allowing us to compose code using functional programming constructs.
 
-While examples are in Scala, the abstractions and patterns described are
+While the examples below are in Scala, the abstractions and patterns described are
 applicable to most modern languages. Basic familiarity with functional patterns
 is assumed, but you can catch up by reading [Mary's awesome introduction to functional
 programming](https://codewords.hackerschool.com/issues/one/an-introduction-to-functional-programming).
 
 
-##To Callback Hell and Back
+##To callback hell and back
 
 Consider the following example of single-threaded synchronous code:
 the `countWordOccurrences` function takes a `List` of URLs and a keyword, fetches
-HTML behind each URL, parses HTML into DOM representation, and counts the number
-of times the keyword occurs within each page.  It returns a `List` of pairs of
+the HTML behind each URL, parses the HTML into a DOM representation, and counts the number
+of times the keyword occurs within each page. It returns a `List` of pairs of
 URL and count:
 
 ```scala
@@ -48,10 +54,10 @@ URL and count:
 
 ```
 
-This code is easy to reason about—operations are performed one after another,
-in the specified order.  However, this is not very efficient—each `fetchUrl`
+This code is easy to reason about &mdash; operations are performed one after another,
+in the specified order. However, this is not very efficient&mdash;each `fetchUrl`
 call is independent from one another and thus easily parallelized, yet this code
-executes them serially.  Furthermore, each `fetchUrl` operation involves network
+executes them serially. Furthermore, each `fetchUrl` operation involves network
 IO and will block the execution thread while waiting for IO to complete.
 
 With a callback-based asynchronous approach, the code may look something like this:
@@ -110,34 +116,33 @@ With a callback-based asynchronous approach, the code may look something like th
 ```
 
 Here, each `...Async` function returns immediately and execution continues while
-network IO or other computation is underway.  Callback functions are passed as
+the network IO or other computation is underway. Callback functions are passed as
 arguments to handle cases when the operation is successful and when an error occurs.
 The callbacks are executed once the operation is completed.
 
 This approach allows for more efficient use of system resources, but still has
 a number of drawbacks:
- - Need for shared state variables (`resultsAccumulator` and `isUrlCompleted`)
-   and synchronization of access
+
+ - We need to have shared state variables (`resultsAccumulator` and `isUrlCompleted`)
+   and synchronize access to them
  - Each asynchronous processing step requires a nested callback, quickly leading
    to "callback hell"
- - Code is much harder to read and understand
+ - The code is much harder to read and understand
 
 
-##Futures and Promises
+##Futures and promises
+
 
 What is particularly nice about the synchronous code in the first example is that
 a function like `fetchUrl` returns a `String` value that other functions in
-turn use for their computations.  This leads to easily readable and composable
+turn use for their computations. This leads to easily readable and composable
 code.
 
-`Future` allows for a similar pattern with asynchronous code. `Future` is an
-object that expresses a result of asynchronous computation—a value that is not
-available yet but may be available in the future<sup>[1]</sup>. This allows the asynchronous
-version of `fetchUrl` to return a value of type `Future[String]` which is then
-used in synchronous-looking code, without worrying about whether a `String`
-value is actually available.
+Futures allow for a similar pattern using asynchronous rather than synchronous code. A future is an
+object that expresses a result of asynchronous computation&mdash;a value that is not
+available yet but may be available in the future[^1]. This allows the asynchronous version of `fetchUrl` to return a value of type `Future[String]` which is then used in synchronous-looking code, without worrying about whether a `String` value is actually available.
 
-`Promise` objects are utility objects that make it easier to construct `Future` objects, like so:
+Promise objects are utility objects that make it easier to construct futures, like so:
 
 ```scala
 
@@ -155,25 +160,26 @@ In this example, `fetchUrl` calls the callback-based counterpart `fetchUrlAsync`
 with a success handler that completes `Promise p` with success and a failure
 handler that completes `p` with failure. The function then extracts a `Future`
 out of `Promise p` and returns it to the caller. This "wrapping" of
-callback-based code using `Promise` objects to return a `Future` object is a
+callback-based code using promise objects to return a future object is a
 very common pattern in reactive programming.
 
 The `parseHtmlToDOM` and `countWordOccurrencesInDOM` functions would be
 similarly refactored to return `Future[DOM]` and `Future[Int]` respectively.
 
 
-##Composing Futures and a Way to Map/Filter/Reduce Hell
+##Composing futures and a way to map/filter/reduce hell
+
 
 The `Future` trait defines standard higher-order functions such as `map`, `flatMap`,
 `filter`, `fold`, and `reduce`. These functions are not exactly the same as ones
 defined on `List`, but are similar. For example, `flatMap` defined
 on `Future[T]` applies a function that takes `T` as an argument and returns
 `Future[S]` and flattens the resulting `Future[Future[S]]` into a single
-`Future[S]`<sup>[2]</sup>.  This is analogous to how `flatMap` on `List` flattens a `List`
+`Future[S]`[^2].  This is analogous to how `flatMap` on `List` flattens a `List`
 of `List` into a single `List`.
 
 The higher-order functions make it possible to compose functions returning
-`Future` using familiar functional programming patterns:
+futures using familiar functional programming patterns:
 
 ```scala
   import scala.concurrent.{ Future, Promise }
@@ -198,37 +204,37 @@ The higher-order functions make it possible to compose functions returning
 ```
 
 The new version of `countWordOccurrences` simply performs `flatMap` on the result of
-`fetchUrl` over `parseHtmlToDOM` and `countKeywordOccurrencesInDOM` and finally
+`fetchUrl` over `parseHtmlToDOM` and `countKeywordOccurrencesInDOM` and 
 maps the result to a pair of URL and count, resulting in `Future[(String, Int)]`.
 
-The last step is necessary to transform a `List` of `Future[(String, Int)]`
+The call to `Future.sequence` is necessary to transform the `List` of `Future[(String, Int)]`
 into a `Future` of `List[(String, Int)]`.
 
-This code appears much cleaner than the callback example.  However, it is
+This code appears much cleaner than the callback example. However, it is
 important to note that each function in the above example is defined to take
-exact output of the preceding function.  We may not be so lucky with real-world
+exactly output of the preceding function. We may not be so lucky with real-world
 APIs and we may need to process output before passing it to the next function.
 So, it is easy to imagine that real-world code could become much more complicated
-with added processing steps. It may even feel like we are simply trading the
+by additional processing steps. It may even feel like we are simply trading 
 callback hell for map/filter/reduce hell.
 
 Finally, reactive code composed with higher-order functions is often not purely
 functional—it typically involves side effects through network or file system
-IO<sup>[3]</sup>.
+IO[^3].
 
 So, is there an even better way to write asynchronous code?
 
-##Macros to the Rescue: Async/Await
+
+##Macros to the rescue: async/await
+
 
 The [Scala Async](https://github.com/scala/async) library provides `async` and `await`
-macros inspired by the similar constructs originally introduced by C#. The
-macros make it possible to write efficient asynchronous code in direct style,
-very similar to how synchronous code is written in the first example.
+macros inspired by the similar constructs originally introduced by C#. The macros make it possible to write efficient asynchronous code in a direct style, very similar to how the synchronous code was written in the first example.
 
-The basic approach is to wrap each block of asynchronous code within an `async` block
-and each computation resulting in a `Future` within an `await` block.  The
-computation within an `await` block will be "suspended" until the corresponding
-`Future` is completed, but in a non-blocking fashion and without any performance
+The basic approach is to wrap each block of asynchronous code within an async block
+and each computation resulting in a future within an await block. The
+computation within an await block will be "suspended" until the corresponding
+future is completed, but in a non-blocking fashion and without any performance
 penalties.
 
 ```scala
@@ -256,37 +262,37 @@ penalties.
 ```
 
 The code above looks nearly identical to the synchronous code from the
-first example, reflects programmer's intent more directly, and feels more natural.
+first example, reflects our intent more directly, and feels more natural.
 
-##What’s Next?
+
+##What’s next?
+
 
 We barely scratched the surface of reactive programming using `Future`, `Promise`
-and `async`/`await` constructs.  The upcoming Coursera course [Principles of
-Reactive Programming](https://www.coursera.org/course/reactive) really digs into
-details, incorporates interesting programming exercises and covers two more
-reactive patterns that are particularly useful: `Observable` and `Actor`.
+and `async`/`await` constructs. The upcoming Coursera course [Principles of
+Reactive Programming](https://www.coursera.org/course/reactive) digs deeper into
+the details, incorporates interesting programming exercises, and covers two more
+reactive patterns that are particularly useful: observables and actors.
 
-`Observable` provides a powerful abstraction over event streams, similarly to
-how `Future` provides an abstraction over discrete events.  The most notable
-implementation of `Observable` is probably Microsoft's open-source [Reactive
+Observables provide a powerful abstraction over event streams, similarly to
+how futures provide an abstraction over discrete events.  The most notable
+implementation of observables is probably Microsoft's open-source [Reactive
 Extensions library](https://github.com/Reactive-Extensions).  This library was
 used extensively at Netflix to [redefine how they approach both back-end and
-front-end development](http://techblog.netflix.com/2013/01/reactive-programming-at-netflix.html).
-Netflix also put together [a great interactive tutorial that covers use of Reactive
-Extensions with JavaScript](http://jhusain.github.com/learnrx/index.html).
+front-end development](http://techblog.netflix.com/2013/01/reactive-programming-at-netflix.html). Netflix also put together [a great interactive tutorial that covers using Reactive Extensions with JavaScript](http://jhusain.github.com/learnrx/index.html).
 
-`Actor` provides building blocks for distributed, fault-tolerant
-message passing applications, such as messaging servers, trading systems and
-telecom appliances.  The most notable implementations of `Actor` include
+Actors provide the building blocks for distributed, fault-tolerant
+message-passing applications, such as messaging servers, trading systems, and
+telecom appliances. The most notable implementations of actors include
 [Erlang OTP](http://www.erlang.org/doc/) and [TypeSafe Akka](http://akka.io/).
 
 
 -----------------------------
 
-[1]: Since the computation may succeed or throw an error, `Future` will either
+[^1]: Since the computation may succeed or throw an error, the future will either
 complete with a value (success) or with an error (failure).
 
-[2]: You don't need to know this to follow the rest of this article, but if you
+[^2]: You don't need to know this to follow the rest of this article, but if you
 are curious, here is a sketch of how `flatMap` may be implemented on `Future[T]`:
 
 ```scala
@@ -323,5 +329,5 @@ are curious, here is a sketch of how `flatMap` may be implemented on `Future[T]`
 
 ```
 
-[3]: This is why popular "Reactive Functional Programming" term feels like a bit
+[^3]: This is why the popular term "Reactive Functional Programming" feels like a bit
 of misnomer.
